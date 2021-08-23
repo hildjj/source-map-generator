@@ -1,10 +1,8 @@
 # Source Map
 
-<!--
-[![Build Status](https://travis-ci.org/mozilla/source-map.svg?branch=master)](https://travis-ci.org/mozilla/source-map)
+[![Tests](https://github.com/hildjj/source-map-generator/actions/workflows/node.js.yml/badge.svg)](https://github.com/hildjj/source-map-generator/actions/workflows/node.js.yml)
 
-[![Coverage Status](https://coveralls.io/repos/github/mozilla/source-map/badge.svg)](https://coveralls.io/github/mozilla/source-map)
--->
+[![codecov](https://codecov.io/gh/hildjj/source-map-generator/branch/main/graph/badge.svg?token=M80IXLBBLD)](https://codecov.io/gh/hildjj/source-map-generator)
 
 [![NPM](https://nodei.co/npm/source-map-generator.png?downloads=true&downloadRank=true)](https://www.npmjs.com/package/source-map-generator)
 
