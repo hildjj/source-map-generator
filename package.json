@@ -2,7 +2,7 @@
   "name": "source-map-generator",
   "description": "Generates source maps",
   "version": "0.8.0-beta.0",
-  "homepage": "https://github.com/mozilla/source-map",
+  "homepage": "https://github.com/hildjj/source-map-generator",
   "author": "Nick Fitzgerald <nfitzgerald@mozilla.com>",
   "contributors": [
     "Tobias Koppers <tobias.koppers@googlemail.com>",
@@ -40,11 +40,12 @@
     "Gilad Peleg <giladp007@gmail.com>",
     "djchie <djchie.dev@gmail.com>",
     "Gary Ye <garysye@gmail.com>",
-    "Nicolas Lalevée <nicolas.lalevee@hibnet.org>"
+    "Nicolas Lalevée <nicolas.lalevee@hibnet.org>",
+    "Joe Hildebrand <joe-github@cursive.net>"
   ],
   "repository": {
     "type": "git",
-    "url": "http://github.com/mozilla/source-map.git"
+    "url": "http://github.com/hildjj/source-map-generator.git"
   },
   "main": "./source-map.js",
   "types": "./source-map.d.ts",
