@@ -8,8 +8,7 @@
 const util = require("./util");
 const SourceMapGenerator = require("../lib/source-map-generator")
   .SourceMapGenerator;
-const SourceMapConsumer = require("../lib/source-map-consumer")
-  .SourceMapConsumer;
+const { SourceMapConsumer } = require("source-map");
 const SourceNode = require("../lib/source-node").SourceNode;
 
 function forEachNewline(fn) {

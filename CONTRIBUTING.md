@@ -9,7 +9,6 @@ very appreciated.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
 ## Table of Contents
 
 - [Filing Issues](#filing-issues)
@@ -38,19 +37,11 @@ If you are filing an issue for a bug or other misbehavior, please provide:
 
 ## Building From Source
 
-Install Node.js `8` or greater and then run
+Install Node.js `10` or greater and then run
 
-    $ git clone https://github.com/mozilla/source-map.git
-    $ cd source-map/
+    $ git clone https://github.com/hildjj/source-map-generator.git
+    $ cd source-map-generator/
     $ npm install
-
-Next, run
-
-    $ npm run build
-
-This will create the following files:
-
-- `dist/source-map.js` - The plain browser build.
 
 ## Submitting Pull Requests
 
@@ -68,11 +59,11 @@ then run the tests with `npm test`:
 
 ```shell
 $ npm test
-> source-map@0.7.3 test /Users/fitzgen/src/source-map
+> source-map-generator@0.7.3 test /Users/fitzgen/src/source-map-generator
 > node test/run-tests.js
 
 
-137 / 137 tests passed.
+65 / 65 tests passed.
 ```
 
 ## Writing New Tests
@@ -135,46 +126,3 @@ $ npm run dev
 This will run the coverage tools, and monitor all of the files in the
 project, re-running the coverage tools and refreshing the browser when
 any files change. There will be a small web server running on port 4103 to enable this. Control-C to stop.
-
-## Updating the `lib/mappings.wasm` WebAssembly Module
-
-Ensure that you have the Rust toolchain installed:
-
-```
-$ curl https://sh.rustup.rs -sSf | sh
-```
-
-The `wasm32-unknown-unknown` target is nightly-only at the time of writing. Use
-`rustup` to ensure you have it installed:
-
-```
-$ rustup toolchain install nightly
-$ rustup target add wasm32-unknown-unknown --toolchain nightly
-```
-
-Next, clone the Rust source used to create `lib/mappings.wasm`:
-
-```
-$ git clone https://github.com/fitzgen/source-map-mappings.git
-$ cd source-map-mappings/
-```
-
-Make sure the crate's tests pass:
-
-```
-$ cargo test
-```
-
-Ensure that you have the following wasm post-processing tools installed:
-
-- `wasm-nm`: https://github.com/fitzgen/wasm-nm
-- `wasm-gc`: https://github.com/alexcrichton/wasm-gc
-- `wasm-snip`: https://github.com/fitzgen/wasm-snip
-- `wasm-opt`: https://github.com/WebAssembly/binaryen
-
-Build Rust crate as a `.wasm` file:
-
-```
-$ cd source-map-mappings-wasm-api/
-$ ./build.py -o path/to/source-map/lib/mappings.wasm
-```

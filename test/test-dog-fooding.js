@@ -6,8 +6,7 @@
  */
 
 const util = require("./util");
-const SourceMapConsumer = require("../lib/source-map-consumer")
-  .SourceMapConsumer;
+const { SourceMapConsumer } = require("source-map");
 const SourceMapGenerator = require("../lib/source-map-generator")
   .SourceMapGenerator;
 

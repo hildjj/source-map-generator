@@ -1,28 +1,30 @@
 # Source Map
 
+<!--
 [![Build Status](https://travis-ci.org/mozilla/source-map.svg?branch=master)](https://travis-ci.org/mozilla/source-map)
 
 [![Coverage Status](https://coveralls.io/repos/github/mozilla/source-map/badge.svg)](https://coveralls.io/github/mozilla/source-map)
+-->
 
-[![NPM](https://nodei.co/npm/source-map.png?downloads=true&downloadRank=true)](https://www.npmjs.com/package/source-map)
+[![NPM](https://nodei.co/npm/source-map-generator.png?downloads=true&downloadRank=true)](https://www.npmjs.com/package/source-map-generator)
 
-This is a library to generate and consume the source map format
-[described here][format].
+This is a library to generate the source map format
+[described here][format].  It is a close fork of [source-map](https://github.com/mozilla/source-map), which also provides a source map consumer.
 
 [format]: https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k/edit
 
 ## Use with Node
 
-    $ npm install source-map
+    $ npm install source-map-generator
 
 ## Use on the Web
 
 ```html
-<script src="https://unpkg.com/source-map@0.7.3/dist/source-map.js"></script>
+<script src="https://unpkg.com/source-map-generator@0.8.0/dist/source-map.js"></script>
 <script>
-    sourceMap.SourceMapConsumer.initialize({
-        "lib/mappings.wasm": "https://unpkg.com/source-map@0.7.3/lib/mappings.wasm"
-    });
+  const map = new SourceMapGenerator({
+    file: "source-mapped.js"
+  });
 </script>
 ```
 ---
@@ -31,37 +33,20 @@ This is a library to generate and consume the source map format
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
 ## Table of Contents
 
 - [Examples](#examples)
-  - [Consuming a source map](#consuming-a-source-map)
   - [Generating a source map](#generating-a-source-map)
     - [With SourceNode (high level API)](#with-sourcenode-high-level-api)
     - [With SourceMapGenerator (low level API)](#with-sourcemapgenerator-low-level-api)
 - [API](#api)
-  - [SourceMapConsumer](#sourcemapconsumer)
-    - [SourceMapConsumer.initialize(options)](#sourcemapconsumerinitializeoptions)
-    - [new SourceMapConsumer(rawSourceMap)](#new-sourcemapconsumerrawsourcemap)
-    - [SourceMapConsumer.with](#sourcemapconsumerwith)
-    - [SourceMapConsumer.prototype.destroy()](#sourcemapconsumerprototypedestroy)
-    - [SourceMapConsumer.prototype.computeColumnSpans()](#sourcemapconsumerprototypecomputecolumnspans)
-    - [SourceMapConsumer.prototype.originalPositionFor(generatedPosition)](#sourcemapconsumerprototypeoriginalpositionforgeneratedposition)
-    - [SourceMapConsumer.prototype.generatedPositionFor(originalPosition)](#sourcemapconsumerprototypegeneratedpositionfororiginalposition)
-    - [SourceMapConsumer.prototype.allGeneratedPositionsFor(originalPosition)](#sourcemapconsumerprototypeallgeneratedpositionsfororiginalposition)
-    - [SourceMapConsumer.prototype.hasContentsOfAllSources()](#sourcemapconsumerprototypehascontentsofallsources)
-    - [SourceMapConsumer.prototype.sourceContentFor(source[, returnNullOnMissing])](#sourcemapconsumerprototypesourcecontentforsource-returnnullonmissing)
-    - [SourceMapConsumer.prototype.eachMapping(callback, context, order)](#sourcemapconsumerprototypeeachmappingcallback-context-order)
   - [SourceMapGenerator](#sourcemapgenerator)
     - [new SourceMapGenerator([startOfSourceMap])](#new-sourcemapgeneratorstartofsourcemap)
-    - [SourceMapGenerator.fromSourceMap(sourceMapConsumer)](#sourcemapgeneratorfromsourcemapsourcemapconsumer)
     - [SourceMapGenerator.prototype.addMapping(mapping)](#sourcemapgeneratorprototypeaddmappingmapping)
     - [SourceMapGenerator.prototype.setSourceContent(sourceFile, sourceContent)](#sourcemapgeneratorprototypesetsourcecontentsourcefile-sourcecontent)
-    - [SourceMapGenerator.prototype.applySourceMap(sourceMapConsumer[, sourceFile[, sourceMapPath]])](#sourcemapgeneratorprototypeapplysourcemapsourcemapconsumer-sourcefile-sourcemappath)
     - [SourceMapGenerator.prototype.toString()](#sourcemapgeneratorprototypetostring)
   - [SourceNode](#sourcenode)
     - [new SourceNode([line, column, source[, chunk[, name]]])](#new-sourcenodeline-column-source-chunk-name)
-    - [SourceNode.fromStringWithSourceMap(code, sourceMapConsumer[, relativePath])](#sourcenodefromstringwithsourcemapcode-sourcemapconsumer-relativepath)
     - [SourceNode.prototype.add(chunk)](#sourcenodeprototypeaddchunk)
     - [SourceNode.prototype.prepend(chunk)](#sourcenodeprototypeprependchunk)
     - [SourceNode.prototype.setSourceContent(sourceFile, sourceContent)](#sourcenodeprototypesetsourcecontentsourcefile-sourcecontent)
@@ -75,51 +60,6 @@ This is a library to generate and consume the source map format
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Examples
-
-### Consuming a source map
-
-```js
-const rawSourceMap = {
-  version: 3,
-  file: "min.js",
-  names: ["bar", "baz", "n"],
-  sources: ["one.js", "two.js"],
-  sourceRoot: "http://example.com/www/js/",
-  mappings: "CAAC,IAAI,IAAM,SAAUA,GAClB,OAAOC,IAAID;CCDb,IAAI,IAAM,SAAUE,GAClB,OAAOA"
-};
-
-const whatever = await SourceMapConsumer.with(rawSourceMap, null, consumer => {
-  console.log(consumer.sources);
-  // [ 'http://example.com/www/js/one.js',
-  //   'http://example.com/www/js/two.js' ]
-
-  console.log(
-    consumer.originalPositionFor({
-      line: 2,
-      column: 28
-    })
-  );
-  // { source: 'http://example.com/www/js/two.js',
-  //   line: 2,
-  //   column: 10,
-  //   name: 'n' }
-
-  console.log(
-    consumer.generatedPositionFor({
-      source: "http://example.com/www/js/two.js",
-      line: 2,
-      column: 10
-    })
-  );
-  // { line: 2, column: 28 }
-
-  consumer.eachMapping(function(m) {
-    // ...
-  });
-
-  return computeWhatever();
-});
-```
 
 ### Generating a source map
 
@@ -194,325 +134,6 @@ var sourceMap = window.sourceMap;
 const sourceMap = require("devtools/toolkit/sourcemap/source-map.js");
 ```
 
-### SourceMapConsumer
-
-A `SourceMapConsumer` instance represents a parsed source map which we can query
-for information about the original file positions by giving it a file position
-in the generated source.
-
-#### SourceMapConsumer.initialize(options)
-
-When using `SourceMapConsumer` outside of node.js, for example on the Web, it
-needs to know from what URL to load `lib/mappings.wasm`. You must inform it by
-calling `initialize` before constructing any `SourceMapConsumer`s.
-
-The options object has the following properties:
-
-- `"lib/mappings.wasm"`: A `String` containing the URL of the
-  `lib/mappings.wasm` file, or an `ArrayBuffer` with the contents of `lib/mappings.wasm`.
-
-```js
-sourceMap.SourceMapConsumer.initialize({
-  "lib/mappings.wasm": "https://example.com/source-map/lib/mappings.wasm"
-});
-```
-
-#### new SourceMapConsumer(rawSourceMap)
-
-The only parameter is the raw source map (either as a string which can be
-`JSON.parse`'d, or an object). According to the spec, source maps have the
-following attributes:
-
-- `version`: Which version of the source map spec this map is following.
-
-- `sources`: An array of URLs to the original source files.
-
-- `names`: An array of identifiers which can be referenced by individual
-  mappings.
-
-- `sourceRoot`: Optional. The URL root from which all sources are relative.
-
-- `sourcesContent`: Optional. An array of contents of the original source files.
-
-- `mappings`: A string of base64 VLQs which contain the actual mappings.
-
-- `file`: Optional. The generated filename this source map is associated with.
-
-The promise of the constructed souce map consumer is returned.
-
-When the `SourceMapConsumer` will no longer be used anymore, you must call its
-`destroy` method.
-
-```js
-const consumer = await new sourceMap.SourceMapConsumer(rawSourceMapJsonData);
-doStuffWith(consumer);
-consumer.destroy();
-```
-
-Alternatively, you can use `SourceMapConsumer.with` to avoid needing to remember
-to call `destroy`.
-
-#### SourceMapConsumer.with
-
-Construct a new `SourceMapConsumer` from `rawSourceMap` and `sourceMapUrl`
-(see the `SourceMapConsumer` constructor for details. Then, invoke the `async function f(SourceMapConsumer) -> T` with the newly constructed consumer, wait
-for `f` to complete, call `destroy` on the consumer, and return `f`'s return
-value.
-
-You must not use the consumer after `f` completes!
-
-By using `with`, you do not have to remember to manually call `destroy` on
-the consumer, since it will be called automatically once `f` completes.
-
-```js
-const xSquared = await SourceMapConsumer.with(myRawSourceMap, null, async function(consumer) {
-  // Use `consumer` inside here and don't worry about remembering
-  // to call `destroy`.
-
-  const x = await whatever(consumer);
-  return x * x;
-});
-
-// You may not use that `consumer` anymore out here; it has
-// been destroyed. But you can use `xSquared`.
-console.log(xSquared);
-```
-
-#### SourceMapConsumer.prototype.destroy()
-
-Free this source map consumer's associated wasm data that is manually-managed.
-
-```js
-consumer.destroy();
-```
-
-Alternatively, you can use `SourceMapConsumer.with` to avoid needing to remember
-to call `destroy`.
-
-#### SourceMapConsumer.prototype.computeColumnSpans()
-
-Compute the last column for each generated mapping. The last column is
-inclusive.
-
-```js
-// Before:
-consumer.allGeneratedPositionsFor({ line: 2, source: "foo.coffee" });
-// [ { line: 2,
-//     column: 1 },
-//   { line: 2,
-//     column: 10 },
-//   { line: 2,
-//     column: 20 } ]
-
-consumer.computeColumnSpans();
-
-// After:
-consumer.allGeneratedPositionsFor({ line: 2, source: "foo.coffee" });
-// [ { line: 2,
-//     column: 1,
-//     lastColumn: 9 },
-//   { line: 2,
-//     column: 10,
-//     lastColumn: 19 },
-//   { line: 2,
-//     column: 20,
-//     lastColumn: Infinity } ]
-```
-
-#### SourceMapConsumer.prototype.originalPositionFor(generatedPosition)
-
-Returns the original source, line, and column information for the generated
-source's line and column positions provided. The only argument is an object with
-the following properties:
-
-- `line`: The line number in the generated source. Line numbers in
-  this library are 1-based (note that the underlying source map
-  specification uses 0-based line numbers -- this library handles the
-  translation).
-
-- `column`: The column number in the generated source. Column numbers
-  in this library are 0-based.
-
-- `bias`: Either `SourceMapConsumer.GREATEST_LOWER_BOUND` or
-  `SourceMapConsumer.LEAST_UPPER_BOUND`. Specifies whether to return the closest
-  element that is smaller than or greater than the one we are searching for,
-  respectively, if the exact element cannot be found. Defaults to
-  `SourceMapConsumer.GREATEST_LOWER_BOUND`.
-
-and an object is returned with the following properties:
-
-- `source`: The original source file, or null if this information is not
-  available.
-
-- `line`: The line number in the original source, or null if this information is
-  not available. The line number is 1-based.
-
-- `column`: The column number in the original source, or null if this
-  information is not available. The column number is 0-based.
-
-- `name`: The original identifier, or null if this information is not available.
-
-```js
-consumer.originalPositionFor({ line: 2, column: 10 });
-// { source: 'foo.coffee',
-//   line: 2,
-//   column: 2,
-//   name: null }
-
-consumer.originalPositionFor({
-  line: 99999999999999999,
-  column: 999999999999999
-});
-// { source: null,
-//   line: null,
-//   column: null,
-//   name: null }
-```
-
-#### SourceMapConsumer.prototype.generatedPositionFor(originalPosition)
-
-Returns the generated line and column information for the original source,
-line, and column positions provided. The only argument is an object with
-the following properties:
-
-- `source`: The filename of the original source.
-
-- `line`: The line number in the original source. The line number is
-  1-based.
-
-- `column`: The column number in the original source. The column
-  number is 0-based.
-
-and an object is returned with the following properties:
-
-- `line`: The line number in the generated source, or null. The line
-  number is 1-based.
-
-- `column`: The column number in the generated source, or null. The
-  column number is 0-based.
-
-```js
-consumer.generatedPositionFor({ source: "example.js", line: 2, column: 10 });
-// { line: 1,
-//   column: 56 }
-```
-
-#### SourceMapConsumer.prototype.allGeneratedPositionsFor(originalPosition)
-
-Returns all generated line and column information for the original source, line,
-and column provided. If no column is provided, returns all mappings
-corresponding to a either the line we are searching for or the next closest line
-that has any mappings. Otherwise, returns all mappings corresponding to the
-given line and either the column we are searching for or the next closest column
-that has any offsets.
-
-The only argument is an object with the following properties:
-
-- `source`: The filename of the original source.
-
-- `line`: The line number in the original source. The line number is
-  1-based.
-
-- `column`: Optional. The column number in the original source. The
-  column number is 0-based.
-
-and an array of objects is returned, each with the following properties:
-
-- `line`: The line number in the generated source, or null. The line
-  number is 1-based.
-
-- `column`: The column number in the generated source, or null. The
-  column number is 0-based.
-
-```js
-consumer.allGeneratedPositionsFor({ line: 2, source: "foo.coffee" });
-// [ { line: 2,
-//     column: 1 },
-//   { line: 2,
-//     column: 10 },
-//   { line: 2,
-//     column: 20 } ]
-```
-
-#### SourceMapConsumer.prototype.hasContentsOfAllSources()
-
-Return true if we have the embedded source content for every source listed in
-the source map, false otherwise.
-
-In other words, if this method returns `true`, then
-`consumer.sourceContentFor(s)` will succeed for every source `s` in
-`consumer.sources`.
-
-```js
-// ...
-if (consumer.hasContentsOfAllSources()) {
-  consumerReadyCallback(consumer);
-} else {
-  fetchSources(consumer, consumerReadyCallback);
-}
-// ...
-```
-
-#### SourceMapConsumer.prototype.sourceContentFor(source[, returnNullOnMissing])
-
-Returns the original source content for the source provided. The only
-argument is the URL of the original source file.
-
-If the source content for the given source is not found, then an error is
-thrown. Optionally, pass `true` as the second param to have `null` returned
-instead.
-
-```js
-consumer.sources;
-// [ "my-cool-lib.clj" ]
-
-consumer.sourceContentFor("my-cool-lib.clj");
-// "..."
-
-consumer.sourceContentFor("this is not in the source map");
-// Error: "this is not in the source map" is not in the source map
-
-consumer.sourceContentFor("this is not in the source map", true);
-// null
-```
-
-#### SourceMapConsumer.prototype.eachMapping(callback, context, order)
-
-Iterate over each mapping between an original source/line/column and a
-generated line/column in this source map.
-
-- `callback`: The function that is called with each mapping. Mappings have the
-  form `{ source, generatedLine, generatedColumn, originalLine, originalColumn, name }`
-
-- `context`: Optional. If specified, this object will be the value of `this`
-  every time that `callback` is called.
-
-- `order`: Either `SourceMapConsumer.GENERATED_ORDER` or
-  `SourceMapConsumer.ORIGINAL_ORDER`. Specifies whether you want to iterate over
-  the mappings sorted by the generated file's line/column order or the
-  original's source/line/column order, respectively. Defaults to
-  `SourceMapConsumer.GENERATED_ORDER`.
-
-```js
-consumer.eachMapping(function(m) {
-  console.log(m);
-});
-// ...
-// { source: 'illmatic.js',
-//   generatedLine: 1,
-//   generatedColumn: 0,
-//   originalLine: 1,
-//   originalColumn: 0,
-//   name: null }
-// { source: 'illmatic.js',
-//   generatedLine: 2,
-//   generatedColumn: 0,
-//   originalLine: 2,
-//   originalColumn: 0,
-//   name: null }
-// ...
-```
-
 ### SourceMapGenerator
 
 An instance of the SourceMapGenerator represents a source map which is being
@@ -537,16 +158,6 @@ var generator = new sourceMap.SourceMapGenerator({
   file: "my-generated-javascript-file.js",
   sourceRoot: "http://example.com/app/js/"
 });
-```
-
-#### SourceMapGenerator.fromSourceMap(sourceMapConsumer)
-
-Creates a new `SourceMapGenerator` from an existing `SourceMapConsumer` instance.
-
-- `sourceMapConsumer` The SourceMap.
-
-```js
-var generator = sourceMap.SourceMapGenerator.fromSourceMap(consumer);
 ```
 
 #### SourceMapGenerator.prototype.addMapping(mapping)
@@ -582,30 +193,6 @@ Set the source content for an original source file.
 ```js
 generator.setSourceContent("module-one.scm", fs.readFileSync("path/to/module-one.scm"));
 ```
-
-#### SourceMapGenerator.prototype.applySourceMap(sourceMapConsumer[, sourceFile[, sourceMapPath]])
-
-Applies a SourceMap for a source file to the SourceMap.
-Each mapping to the supplied source file is rewritten using the
-supplied SourceMap. Note: The resolution for the resulting mappings
-is the minimum of this map and the supplied map.
-
-- `sourceMapConsumer`: The SourceMap to be applied.
-
-- `sourceFile`: Optional. The filename of the source file.
-  If omitted, sourceMapConsumer.file will be used, if it exists.
-  Otherwise an error will be thrown.
-
-- `sourceMapPath`: Optional. The dirname of the path to the SourceMap
-  to be applied. If relative, it is relative to the SourceMap.
-
-  This parameter is needed when the two SourceMaps aren't in the same
-  directory, and the SourceMap to be applied contains relative source
-  paths. If so, those relative source paths need to be rewritten
-  relative to the SourceMap.
-
-  If omitted, it is assumed that both SourceMaps are in the same directory,
-  thus not needing any rewriting. (Supplying `'.'` has the same effect.)
 
 #### SourceMapGenerator.prototype.toString()
 
@@ -646,22 +233,6 @@ var node = new SourceNode(1, 2, "a.cpp", [
   new SourceNode(5, 6, "c.cpp", "std::string* make_string(size_t n);\n"),
   new SourceNode(7, 8, "d.cpp", "int main(int argc, char** argv) {}\n")
 ]);
-```
-
-#### SourceNode.fromStringWithSourceMap(code, sourceMapConsumer[, relativePath])
-
-Creates a SourceNode from generated code and a SourceMapConsumer.
-
-- `code`: The generated code
-
-- `sourceMapConsumer` The SourceMap for the generated code
-
-- `relativePath` The optional path that relative sources in `sourceMapConsumer`
-  should be relative to.
-
-```js
-const consumer = await new SourceMapConsumer(fs.readFileSync("path/to/my-file.js.map", "utf8"));
-const node = SourceNode.fromStringWithSourceMap(fs.readFileSync("path/to/my-file.js"), consumer);
 ```
 
 #### SourceNode.prototype.add(chunk)
