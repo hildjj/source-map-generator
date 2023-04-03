@@ -123,7 +123,7 @@ Get a reference to the module:
 
 ```js
 // Node.js
-var sourceMap = require("source-map");
+var sourceMap = require("source-map-generator");
 
 // Browser builds
 var sourceMap = window.sourceMap;
