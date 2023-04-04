@@ -7,7 +7,7 @@
 [![NPM](https://nodei.co/npm/source-map-generator.png?downloads=true&downloadRank=true)](https://www.npmjs.com/package/source-map-generator)
 
 This is a library to generate the source map format
-[described here][format].  It is a close fork of [source-map](https://github.com/mozilla/source-map), which also provides a source map consumer.
+[described here][format]. It is a close fork of [source-map](https://github.com/mozilla/source-map), which also provides a source map consumer.
 
 [format]: https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k/edit
 
@@ -21,17 +21,17 @@ This is a library to generate the source map format
 <script src="https://unpkg.com/source-map-generator@0.8.0/dist/source-map.js"></script>
 <script>
   const map = new SourceMapGenerator({
-    file: "source-mapped.js"
+    file: "source-mapped.js",
   });
 </script>
 ```
+
 ---
 
 <!-- `npm run toc` to regenerate the Table of Contents -->
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-## Table of Contents
 
 - [Examples](#examples)
   - [Generating a source map](#generating-a-source-map)
@@ -70,13 +70,19 @@ In depth guide:
 function compile(ast) {
   switch (ast.type) {
     case "BinaryExpression":
-      return new SourceNode(ast.location.line, ast.location.column, ast.location.source, [
-        compile(ast.left),
-        " + ",
-        compile(ast.right)
-      ]);
+      return new SourceNode(
+        ast.location.line,
+        ast.location.column,
+        ast.location.source,
+        [compile(ast.left), " + ", compile(ast.right)]
+      );
     case "Literal":
-      return new SourceNode(ast.location.line, ast.location.column, ast.location.source, String(ast.value));
+      return new SourceNode(
+        ast.location.line,
+        ast.location.column,
+        ast.location.source,
+        String(ast.value)
+      );
     // ...
     default:
       throw new Error("Bad AST");
@@ -86,7 +92,7 @@ function compile(ast) {
 var ast = parse("40 + 2", "add.js");
 console.log(
   compile(ast).toStringWithSourceMap({
-    file: "add.js"
+    file: "add.js",
   })
 );
 // { code: '40 + 2',
@@ -97,20 +103,20 @@ console.log(
 
 ```js
 var map = new SourceMapGenerator({
-  file: "source-mapped.js"
+  file: "source-mapped.js",
 });
 
 map.addMapping({
   generated: {
     line: 10,
-    column: 35
+    column: 35,
   },
   source: "foo.js",
   original: {
     line: 33,
-    column: 2
+    column: 2,
   },
-  name: "christopher"
+  name: "christopher",
 });
 
 console.log(map.toString());
@@ -154,7 +160,7 @@ You may pass an object with the following properties:
 ```js
 var generator = new sourceMap.SourceMapGenerator({
   file: "my-generated-javascript-file.js",
-  sourceRoot: "http://example.com/app/js/"
+  sourceRoot: "http://example.com/app/js/",
 });
 ```
 
@@ -176,7 +182,7 @@ should have the following properties:
 generator.addMapping({
   source: "module-one.scm",
   original: { line: 128, column: 0 },
-  generated: { line: 3, column: 456 }
+  generated: { line: 3, column: 456 },
 });
 ```
 
@@ -189,7 +195,10 @@ Set the source content for an original source file.
 - `sourceContent` the content of the source file.
 
 ```js
-generator.setSourceContent("module-one.scm", fs.readFileSync("path/to/module-one.scm"));
+generator.setSourceContent(
+  "module-one.scm",
+  fs.readFileSync("path/to/module-one.scm")
+);
 ```
 
 #### SourceMapGenerator.prototype.toString()
@@ -229,7 +238,7 @@ use before outputting the generated JS and source map.
 var node = new SourceNode(1, 2, "a.cpp", [
   new SourceNode(3, 4, "b.cpp", "extern int status;\n"),
   new SourceNode(5, 6, "c.cpp", "std::string* make_string(size_t n);\n"),
-  new SourceNode(7, 8, "d.cpp", "int main(int argc, char** argv) {}\n")
+  new SourceNode(7, 8, "d.cpp", "int main(int argc, char** argv) {}\n"),
 ]);
 ```
 
@@ -267,7 +276,10 @@ Set the source content for a source file. This will be added to the
 - `sourceContent`: The content of the source file
 
 ```js
-node.setSourceContent("module-one.scm", fs.readFileSync("path/to/module-one.scm"));
+node.setSourceContent(
+  "module-one.scm",
+  fs.readFileSync("path/to/module-one.scm")
+);
 ```
 
 #### SourceNode.prototype.walk(fn)
@@ -282,10 +294,10 @@ the its original associated source's line/column location.
 var node = new SourceNode(1, 2, "a.js", [
   new SourceNode(3, 4, "b.js", "uno"),
   "dos",
-  ["tres", new SourceNode(5, 6, "c.js", "quatro")]
+  ["tres", new SourceNode(5, 6, "c.js", "quatro")],
 ]);
 
-node.walk(function(code, loc) {
+node.walk(function (code, loc) {
   console.log("WALK:", code, loc);
 });
 // WALK: uno { source: 'b.js', line: 3, column: 4, name: null }
@@ -310,7 +322,7 @@ var c = new SourceNode(1, 2, "c.js", "generated from c");
 c.setSourceContent("c.js", "original c");
 
 var node = new SourceNode(null, null, null, [a, b, c]);
-node.walkSourceContents(function(source, contents) {
+node.walkSourceContents(function (source, contents) {
   console.log("WALK:", source, ":", contents);
 });
 // WALK: a.js : original a
@@ -357,7 +369,7 @@ concatenates all the various snippets together to one string.
 var node = new SourceNode(1, 2, "a.js", [
   new SourceNode(3, 4, "b.js", "uno"),
   "dos",
-  ["tres", new SourceNode(5, 6, "c.js", "quatro")]
+  ["tres", new SourceNode(5, 6, "c.js", "quatro")],
 ]);
 
 node.toString();
@@ -376,11 +388,10 @@ The arguments are the same as those to `new SourceMapGenerator`.
 var node = new SourceNode(1, 2, "a.js", [
   new SourceNode(3, 4, "b.js", "uno"),
   "dos",
-  ["tres", new SourceNode(5, 6, "c.js", "quatro")]
+  ["tres", new SourceNode(5, 6, "c.js", "quatro")],
 ]);
 
 node.toStringWithSourceMap({ file: "my-output-file.js" });
 // { code: 'unodostresquatro',
 //   map: [object SourceMapGenerator] }
 ```
-
