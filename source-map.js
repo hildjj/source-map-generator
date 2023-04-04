@@ -3,5 +3,6 @@
  * Licensed under the New BSD license. See LICENSE.txt or:
  * http://opensource.org/licenses/BSD-3-Clause
  */
-exports.SourceMapGenerator = require("./lib/source-map-generator").SourceMapGenerator;
+exports.SourceMapGenerator =
+  require("./lib/source-map-generator").SourceMapGenerator;
 exports.SourceNode = require("./lib/source-node").SourceNode;
