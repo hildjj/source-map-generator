@@ -86,5 +86,8 @@
   "overrides": {
     "semver": ">=7.5.3",
     "word-wrap": "npm:@aashutoshrathi/word-wrap"
+  },
+  "engine": {
+    "node": ">=16"
   }
 }
