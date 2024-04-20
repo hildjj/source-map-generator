@@ -147,118 +147,116 @@ exports["test .replaceRight"] = function (assert) {
   assert.equal(node.toString(), "hey sexy mama, want to watch Futurama?");
 };
 
-exports["test .toStringWithSourceMap()"] = forEachNewline(async function (
-  assert,
-  nl
-) {
-  const node = new SourceNode(null, null, null, [
-    "(function () {" + nl,
-    "  ",
-    new SourceNode(1, 0, "a.js", "someCall", "originalCall"),
-    new SourceNode(1, 8, "a.js", "()"),
-    ";" + nl,
-    "  ",
-    new SourceNode(2, 0, "b.js", ["if (foo) bar()"]),
-    ";" + nl,
-    "}());",
-  ]);
-  const result = node.toStringWithSourceMap({
-    file: "foo.js",
-  });
+exports["test .toStringWithSourceMap()"] = forEachNewline(
+  async function (assert, nl) {
+    const node = new SourceNode(null, null, null, [
+      "(function () {" + nl,
+      "  ",
+      new SourceNode(1, 0, "a.js", "someCall", "originalCall"),
+      new SourceNode(1, 8, "a.js", "()"),
+      ";" + nl,
+      "  ",
+      new SourceNode(2, 0, "b.js", ["if (foo) bar()"]),
+      ";" + nl,
+      "}());",
+    ]);
+    const result = node.toStringWithSourceMap({
+      file: "foo.js",
+    });
 
-  assert.equal(
-    result.code,
-    ["(function () {", "  someCall();", "  if (foo) bar();", "}());"].join(nl)
-  );
+    assert.equal(
+      result.code,
+      ["(function () {", "  someCall();", "  if (foo) bar();", "}());"].join(nl)
+    );
 
-  let map = result.map;
-  const mapWithoutOptions = node.toStringWithSourceMap().map;
+    let map = result.map;
+    const mapWithoutOptions = node.toStringWithSourceMap().map;
 
-  assert.ok(
-    map instanceof SourceMapGenerator,
-    "map instanceof SourceMapGenerator"
-  );
-  assert.ok(
-    mapWithoutOptions instanceof SourceMapGenerator,
-    "mapWithoutOptions instanceof SourceMapGenerator"
-  );
-  assert.ok(!("file" in mapWithoutOptions));
-  mapWithoutOptions._file = "foo.js";
-  util.assertEqualMaps(assert, map.toJSON(), mapWithoutOptions.toJSON());
+    assert.ok(
+      map instanceof SourceMapGenerator,
+      "map instanceof SourceMapGenerator"
+    );
+    assert.ok(
+      mapWithoutOptions instanceof SourceMapGenerator,
+      "mapWithoutOptions instanceof SourceMapGenerator"
+    );
+    assert.ok(!("file" in mapWithoutOptions));
+    mapWithoutOptions._file = "foo.js";
+    util.assertEqualMaps(assert, map.toJSON(), mapWithoutOptions.toJSON());
 
-  map = await new SourceMapConsumer(map.toString());
+    map = await new SourceMapConsumer(map.toString());
 
-  let actual;
+    let actual;
 
-  actual = map.originalPositionFor({
-    line: 1,
-    column: 4,
-  });
-  assert.equal(actual.source, null);
-  assert.equal(actual.line, null);
-  assert.equal(actual.column, null);
+    actual = map.originalPositionFor({
+      line: 1,
+      column: 4,
+    });
+    assert.equal(actual.source, null);
+    assert.equal(actual.line, null);
+    assert.equal(actual.column, null);
 
-  actual = map.originalPositionFor({
-    line: 2,
-    column: 2,
-  });
-  assert.equal(actual.source, "a.js");
-  assert.equal(actual.line, 1);
-  assert.equal(actual.column, 0);
-  assert.equal(actual.name, "originalCall");
+    actual = map.originalPositionFor({
+      line: 2,
+      column: 2,
+    });
+    assert.equal(actual.source, "a.js");
+    assert.equal(actual.line, 1);
+    assert.equal(actual.column, 0);
+    assert.equal(actual.name, "originalCall");
 
-  actual = map.originalPositionFor({
-    line: 3,
-    column: 2,
-  });
-  assert.equal(actual.source, "b.js");
-  assert.equal(actual.line, 2);
-  assert.equal(actual.column, 0);
+    actual = map.originalPositionFor({
+      line: 3,
+      column: 2,
+    });
+    assert.equal(actual.source, "b.js");
+    assert.equal(actual.line, 2);
+    assert.equal(actual.column, 0);
 
-  actual = map.originalPositionFor({
-    line: 3,
-    column: 16,
-  });
-  assert.equal(actual.source, null);
-  assert.equal(actual.line, null);
-  assert.equal(actual.column, null);
+    actual = map.originalPositionFor({
+      line: 3,
+      column: 16,
+    });
+    assert.equal(actual.source, null);
+    assert.equal(actual.line, null);
+    assert.equal(actual.column, null);
 
-  actual = map.originalPositionFor({
-    line: 4,
-    column: 2,
-  });
-  assert.equal(actual.source, null);
-  assert.equal(actual.line, null);
-  assert.equal(actual.column, null);
+    actual = map.originalPositionFor({
+      line: 4,
+      column: 2,
+    });
+    assert.equal(actual.source, null);
+    assert.equal(actual.line, null);
+    assert.equal(actual.column, null);
 
-  map.destroy();
-});
+    map.destroy();
+  }
+);
 
-exports["test .fromStringWithSourceMap()"] = forEachNewline(async function (
-  assert,
-  nl
-) {
-  const testCode = util.testGeneratedCode.replace(/\n/g, nl);
-  let map = await new SourceMapConsumer(util.testMap);
-  const node = SourceNode.fromStringWithSourceMap(testCode, map);
-  map.destroy();
+exports["test .fromStringWithSourceMap()"] = forEachNewline(
+  async function (assert, nl) {
+    const testCode = util.testGeneratedCode.replace(/\n/g, nl);
+    let map = await new SourceMapConsumer(util.testMap);
+    const node = SourceNode.fromStringWithSourceMap(testCode, map);
+    map.destroy();
 
-  const result = node.toStringWithSourceMap({
-    file: "min.js",
-  });
-  map = result.map;
-  const code = result.code;
+    const result = node.toStringWithSourceMap({
+      file: "min.js",
+    });
+    map = result.map;
+    const code = result.code;
 
-  assert.equal(code, testCode);
-  assert.ok(
-    map instanceof SourceMapGenerator,
-    "map instanceof SourceMapGenerator"
-  );
-  map = map.toJSON();
-  assert.equal(map.version, util.testMap.version);
-  assert.equal(map.file, util.testMap.file);
-  assert.equal(map.mappings, util.testMap.mappings);
-});
+    assert.equal(code, testCode);
+    assert.ok(
+      map instanceof SourceMapGenerator,
+      "map instanceof SourceMapGenerator"
+    );
+    map = map.toJSON();
+    assert.equal(map.version, util.testMap.version);
+    assert.equal(map.file, util.testMap.file);
+    assert.equal(map.mappings, util.testMap.mappings);
+  }
+);
 
 exports["test .fromStringWithSourceMap() empty map"] = forEachNewline(
   async function (assert, nl) {
