@@ -2,3 +2,5 @@ bench/
 coverage/
 node_modules/
 target/
+pnpm-lock.yaml
+.github/workflows
