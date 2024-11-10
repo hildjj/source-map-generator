@@ -5,7 +5,10 @@ on:
     branches: [main]
   push:
     branches: [main]
-  workflow_dispatch:
+  workflow_call:
+    secrets:
+      CODECOV_TOKEN:
+        required: true
 
 jobs:
   test:
@@ -13,7 +16,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18, 20, 21]
+        node-version: [18, 20, 22, 23]
 
     steps:
       - uses: actions/checkout@v4
@@ -29,15 +32,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - run: corepack enable
       - uses: actions/setup-node@v4
         with:
-          node-version: 21
-          cache: npm
-      - run: npm ci
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install
       - run: npm run lint
       - run: npm run toc
       - run: git diff --stat --exit-code
       - run: npx prettier --check .
       - run: npm run coverage
       - run: npx c8 report --reporter=lcov
-      - uses: codecov/codecov-action@v3
+      - uses: codecov/codecov-action@v4
