@@ -7,3 +7,4 @@ bench/*.svg
 bench/dist/
 bench/node_modules
 coverage/
+.pnpm-store/
