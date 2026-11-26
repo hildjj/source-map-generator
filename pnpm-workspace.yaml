@@ -1,3 +1,5 @@
-auditConfig:
-  ignoreGhsas:
-    - GHSA-vfj7-8cjw-p6xm
+overrides:
+  'ajv@8.20.0>fasturi': ^3.1.9
+  'table@6.9.0>fasturi': ^3.1.9
+  glob: ~14.0.6
+  minimatch: ~11.0.9
